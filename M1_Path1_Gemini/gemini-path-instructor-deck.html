@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Gemini Path — Assistants &amp; Agents (Instructor Deck)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0f1b2d;
+    --navy-2:#16263d;
+    --navy-3:#1d3350;
+    --cream:#f4ecd8;
+    --cream-dim:#cdc4b0;
+    --amber:#e8a13a;
+    --teal:#3fb6a8;
+    --moss:#8aa85a;
+    --rust:#cf6a4a;
+    --line:rgba(244,236,216,0.14);
+    --line-strong:rgba(244,236,216,0.28);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--navy);
+    color:var(--cream);
+    font-family:'Space Grotesk',sans-serif;
+    overflow:hidden;
+  }
+  /* subtle grain + vignette */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%);
+  }
+  .deck{position:relative;width:100vw;height:100vh}
+  .slide{
+    position:absolute;inset:0;
+    display:none;
+    flex-direction:column;
+    padding:clamp(2rem,5vw,4.5rem);
+    opacity:0;
+    transition:opacity .35s ease;
+  }
+  .slide.active{display:flex;opacity:1}
+  .slide.intro{justify-content:center}
+
+  /* kicker / titles */
+  .kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(.7rem,1vw,.85rem);
+    letter-spacing:.22em;text-transform:uppercase;
+    color:var(--amber);margin-bottom:1rem;
+  }
+  h1{
+    font-weight:700;line-height:1.02;
+    font-size:clamp(2.2rem,5.5vw,4.6rem);
+    letter-spacing:-.02em;
+  }
+  h2{
+    font-weight:600;line-height:1.05;
+    font-size:clamp(1.7rem,3.4vw,2.9rem);
+    letter-spacing:-.015em;margin-bottom:.35rem;
+  }
+  .serif{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400}
+  .sub{
+    color:var(--cream-dim);
+    font-size:clamp(1rem,1.7vw,1.4rem);
+    line-height:1.45;max-width:46ch;margin-top:1rem;
+  }
+  .slide-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1.1rem;min-height:0}
+  .lead{font-size:clamp(1.05rem,1.7vw,1.45rem);line-height:1.5;max-width:60ch;color:var(--cream)}
+  .muted{color:var(--cream-dim)}
+  .mono{font-family:'JetBrains Mono',monospace}
+  b,strong{color:#fff;font-weight:600}
+
+  /* footer */
+  .foot{
+    position:absolute;left:clamp(2rem,5vw,4.5rem);right:clamp(2rem,5vw,4.5rem);bottom:1.4rem;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--cream-dim);
+    letter-spacing:.08em;border-top:1px solid var(--line);padding-top:.7rem;
+  }
+  .foot .seg{color:var(--teal)}
+
+  /* progress dots */
+  .dots{position:fixed;top:1.3rem;right:1.5rem;display:flex;gap:.4rem;z-index:60}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--line-strong);transition:.25s;display:block}
+  .dots i.on{background:var(--amber);transform:scale(1.25)}
+
+  /* generic layout helpers */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+  .card{
+    background:var(--navy-2);border:1px solid var(--line);
+    border-radius:14px;padding:1.4rem 1.5rem;
+  }
+  .card h3{font-size:1.15rem;font-weight:600;margin-bottom:.5rem;display:flex;align-items:center;gap:.55rem}
+  .card p{color:var(--cream-dim);font-size:.97rem;line-height:1.45}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .55rem;border-radius:999px;display:inline-block}
+  .t-amber{color:var(--amber);border:1px solid rgba(232,161,58,.4);background:rgba(232,161,58,.08)}
+  .t-teal{color:var(--teal);border:1px solid rgba(63,182,168,.4);background:rgba(63,182,168,.08)}
+  .t-moss{color:var(--moss);border:1px solid rgba(138,168,90,.4);background:rgba(138,168,90,.08)}
+  .t-rust{color:var(--rust);border:1px solid rgba(207,106,74,.4);background:rgba(207,106,74,.08)}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex:none}
+  .d-amber{background:var(--amber)} .d-teal{background:var(--teal)} .d-moss{background:var(--moss)} .d-rust{background:var(--rust)} .d-grey{background:var(--cream-dim)}
+
+  /* spectrum slide */
+  .spectrum{display:flex;align-items:stretch;gap:0;margin-top:1.5rem;width:100%}
+  .spectrum .step{flex:1;padding:1.4rem 1.3rem;border:1px solid var(--line);position:relative}
+  .spectrum .step:first-child{border-radius:14px 0 0 14px}
+  .spectrum .step:last-child{border-radius:0 14px 14px 0}
+  .spectrum .step h3{font-size:1.25rem;margin-bottom:.4rem}
+  .spectrum .step p{color:var(--cream-dim);font-size:.92rem;line-height:1.4}
+  .spectrum .s1{background:linear-gradient(180deg,rgba(205,196,176,.06),transparent)}
+  .spectrum .s2{background:linear-gradient(180deg,rgba(63,182,168,.10),transparent)}
+  .spectrum .s3{background:linear-gradient(180deg,rgba(232,161,58,.12),transparent)}
+  .spectrum .ourbuild{margin-top:.7rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+  .arrowrow{display:flex;align-items:center;justify-content:center;gap:.8rem;margin-top:1.1rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--cream-dim)}
+
+  /* mapping (parallel ladders) */
+  .ladder-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;align-items:center;margin-top:1rem}
+  .ladder{display:flex;flex-direction:column;gap:1rem}
+  .rung{background:var(--navy-2);border:1px solid var(--line);border-radius:12px;padding:1.05rem 1.2rem}
+  .rung .role{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim)}
+  .rung .name{font-size:1.2rem;font-weight:600;margin-top:.2rem}
+  .rung .where{font-size:.82rem;color:var(--cream-dim);margin-top:.15rem;font-family:'JetBrains Mono',monospace}
+  .laddertitle{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.9rem}
+  .equals{display:flex;flex-direction:column;gap:5.3rem;align-items:center;color:var(--amber);font-size:1.6rem;padding-top:2.4rem}
+
+  /* workflow steps (the centerpiece) */
+  .flow{display:flex;flex-direction:column;gap:.75rem;margin-top:.6rem;width:100%}
+  .fstep{display:grid;grid-template-columns:auto 1fr auto;gap:1.1rem;align-items:center;
+    background:var(--navy-2);border:1px solid var(--line);border-left:3px solid var(--accent,var(--teal));
+    border-radius:12px;padding:.85rem 1.2rem}
+  .fstep .num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;color:var(--accent,var(--teal));width:2.1rem;text-align:center}
+  .fstep .txt b{display:block;font-size:1.05rem;color:#fff;margin-bottom:.12rem}
+  .fstep .txt span{font-size:.9rem;color:var(--cream-dim);line-height:1.35}
+  .fstep .pill{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim);white-space:nowrap}
+
+  /* loop diagram */
+  .loop{display:flex;align-items:center;justify-content:center;gap:1.1rem;flex-wrap:wrap;margin-top:1.4rem}
+  .loop .node{background:var(--navy-2);border:1px solid var(--line-strong);border-radius:999px;padding:.7rem 1.3rem;font-weight:600;font-size:1.02rem}
+  .loop .node.hot{border-color:var(--amber);color:var(--amber)}
+  .loop .ar{color:var(--amber);font-size:1.3rem}
+
+  /* test cards */
+  .testrow{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-top:.5rem}
+  .testcard{background:var(--navy-2);border:1px solid var(--line);border-radius:13px;padding:1.25rem;border-top:3px solid var(--accent)}
+  .testcard .lbl{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem}
+  .testcard .q{font-weight:600;font-size:1.02rem;margin-bottom:.4rem}
+  .testcard .e{font-size:.88rem;color:var(--cream-dim);line-height:1.4}
+
+  /* gotchas list */
+  .gotchas{display:flex;flex-direction:column;gap:.8rem;margin-top:.4rem}
+  .gotcha{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start;background:var(--navy-2);border:1px solid var(--line);border-radius:12px;padding:1rem 1.25rem}
+  .gotcha .ic{font-size:1.3rem;line-height:1;width:1.8rem;text-align:center;color:var(--rust)}
+  .gotcha b{color:#fff}
+  .gotcha p{color:var(--cream-dim);font-size:.92rem;line-height:1.4;margin-top:.15rem}
+
+  /* big stat */
+  .statline{display:flex;gap:2.5rem;margin-top:1.6rem;flex-wrap:wrap}
+  .stat .big{font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:var(--amber);line-height:1}
+  .stat .cap{font-size:.85rem;color:var(--cream-dim);margin-top:.4rem;max-width:22ch}
+
+  /* code chip */
+  .chip{font-family:'JetBrains Mono',monospace;background:var(--navy);border:1px solid var(--line-strong);border-radius:6px;padding:.12rem .5rem;font-size:.85em;color:var(--teal)}
+
+  /* nav hint */
+  .navhint{position:fixed;bottom:1.3rem;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--cream-dim);opacity:.5;z-index:60;letter-spacing:.1em}
+
+  .twocol-list{columns:2;column-gap:2.2rem}
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:.7rem}
+  ul.clean li{padding-left:1.5rem;position:relative;font-size:1rem;line-height:1.45;color:var(--cream)}
+  ul.clean li::before{content:"›";position:absolute;left:0;color:var(--amber);font-weight:700}
+  .em-serif{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.15em;color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="dots" id="dots"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide intro active">
+    <div class="kicker">CSC-114 · Domain Assistants &amp; Agents</div>
+    <h1>The Gemini Path</h1>
+    <p class="sub">Same ladder, second platform. We climb from <span class="serif">assistant</span> to <span class="serif">agent</span> on Google's stack — and watch the friction drop.</p>
+    <div style="margin-top:2rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <span class="tag t-teal">Day 1 · Gemini Gem</span>
+      <span class="tag t-amber">Day 2 · Google AI Studio</span>
+      <span class="tag t-moss">Bring your own Google account</span>
+    </div>
+  </section>
+
+  <!-- 2 WHY THIS, WHY NOW -->
+  <section class="slide">
+    <div class="kicker">Where this sits</div>
+    <h2>We've climbed this ladder once already</h2>
+    <div class="slide-body">
+      <p class="lead">With Claude, students built a <b>Project</b> (assistant) and then an agent in the <b>Console</b>. The Console works — but the buy-in is more than some students are comfortable with.</p>
+      <p class="lead">Today we climb the <span class="em-serif">same two rungs on Google's ladder.</span> The payoff isn't Google — it's <b>tool-agnosticism</b>. Building the same climb twice separates the durable judgment from the moving buttons.</p>
+      <div class="grid3" style="margin-top:1rem">
+        <div class="card"><h3><span class="dot d-teal"></span>Lower on-ramp</h3><p>Gems are free on any personal account. An AI Studio agent needs <b>no API key and no billing</b> for what we do.</p></div>
+        <div class="card"><h3><span class="dot d-amber"></span>Same loop</h3><p>Intend → test → change one thing → test again. The discipline transfers untouched.</p></div>
+        <div class="card"><h3><span class="dot d-moss"></span>Real takeaway</h3><p>The judgment is yours, not the platform's. That's what survives the next rename.</p></div>
+      </div>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">02 · Framing</span></div>
+  </section>
+
+  <!-- 3 SPECTRUM -->
+  <section class="slide">
+    <div class="kicker">The distinction we keep</div>
+    <h2>Chatbot → Assistant → Agent</h2>
+    <div class="slide-body">
+      <p class="lead">The whole course turns on this line. Today lives in the last two boxes.</p>
+      <div class="spectrum">
+        <div class="step s1">
+          <h3>Chatbot</h3>
+          <p>Talks. Holds a persona. No memory of your documents, no actions.</p>
+        </div>
+        <div class="step s2">
+          <h3>Assistant <span class="dot d-teal"></span></h3>
+          <p>Persona <b>+ your knowledge.</b> Answers from what you gave it. Still reactive — it can't <i>do</i> anything.</p>
+          <div class="ourbuild" style="color:var(--teal)">◀ Day 1 · the Gem</div>
+        </div>
+        <div class="step s3">
+          <h3>Agent <span class="dot d-amber"></span></h3>
+          <p>Takes <b>actions</b> with tools. Reaches outside itself, then reports back — with sources.</p>
+          <div class="ourbuild" style="color:var(--amber)">◀ Day 2 · AI Studio</div>
+        </div>
+      </div>
+      <p class="lead muted" style="margin-top:1.4rem">The one toggle that crosses the line on Day 2: <span class="chip">Google Search grounding</span> — off is an assistant, on is an agent.</p>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">03 · Spectrum</span></div>
+  </section>
+
+  <!-- 4 PARALLEL LADDERS -->
+  <section class="slide">
+    <div class="kicker">Map it to what they know</div>
+    <h2>Two ladders, identical rungs</h2>
+    <div class="slide-body">
+      <div class="ladder-wrap">
+        <div class="ladder">
+          <div class="laddertitle" style="color:var(--cream-dim)">The Claude path (done)</div>
+          <div class="rung"><div class="role">Agent</div><div class="name">Anthropic Console</div><div class="where">platform.claude.com</div></div>
+          <div class="rung"><div class="role">Assistant</div><div class="name">Claude Project</div><div class="where">claude.ai</div></div>
+        </div>
+        <div class="equals"><span>≈</span><span>≈</span></div>
+        <div class="ladder">
+          <div class="laddertitle" style="color:var(--amber)">The Gemini path (today)</div>
+          <div class="rung" style="border-color:rgba(232,161,58,.4)"><div class="role" style="color:var(--amber)">Agent</div><div class="name">Google AI Studio</div><div class="where">aistudio.google.com</div></div>
+          <div class="rung" style="border-color:rgba(63,182,168,.4)"><div class="role" style="color:var(--teal)">Assistant</div><div class="name">Gemini Gem</div><div class="where">gemini.google.com</div></div>
+        </div>
+      </div>
+      <p class="lead muted" style="text-align:center;margin-top:1.6rem">If a student can name <i>why</i> each rung is what it is on <b>both</b> ladders, they've got the transferable skill.</p>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">04 · Parallel</span></div>
+  </section>
+
+  <!-- 5 DAY 1 WORKFLOW (CENTERPIECE) -->
+  <section class="slide">
+    <div class="kicker" style="color:var(--teal)">Day 1 · workflow</div>
+    <h2>Build a Gem study bot <span class="muted serif" style="font-size:.6em">— the assistant</span></h2>
+    <div class="slide-body">
+      <div class="flow" style="--accent:var(--teal)">
+        <div class="fstep"><div class="num">1</div><div class="txt"><b>Sign in &amp; open the Gem builder</b><span>Personal Google account → <span class="chip">gemini.google.com</span> → Gems → New Gem.</span></div><div class="pill">13+ · BYO account</div></div>
+        <div class="fstep"><div class="num">2</div><div class="txt"><b>Name it for the subject</b><span>"Subnetting Review Buddy" — not "Study Helper."</span></div><div class="pill">Specific</div></div>
+        <div class="fstep"><div class="num">3</div><div class="txt"><b>Write instructions: 3 questions + honesty rule</b><span>Who is the bot? Who am I? What do we do together? + "only answer from my files; say so if it's not covered."</span></div><div class="pill">The heart</div></div>
+        <div class="fstep"><div class="num">4</div><div class="txt"><b>Add 2–3 focused knowledge files</b><span>Up to 10 files · 100 MB each. Keep them tight.</span></div><div class="pill">Knowledge</div></div>
+        <div class="fstep"><div class="num">5</div><div class="txt"><b>Run the three tests, then change ONE thing</b><span>Known-good · known-bad · edge. Fix the biggest problem only. Re-test.</span></div><div class="pill">Loop</div></div>
+        <div class="fstep"><div class="num">6</div><div class="txt"><b>Commit to <span class="chip">gemini-day1/</span></b><span>Instructions · sources · testing log. (Prompt Masters: drag-and-drop.)</span></div><div class="pill">GitHub</div></div>
+      </div>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">05 · Day 1 flow</span></div>
+  </section>
+
+  <!-- 6 THE LOOP -->
+  <section class="slide">
+    <div class="kicker">The discipline under everything</div>
+    <h2>The loop never changes</h2>
+    <div class="slide-body" style="align-items:center">
+      <div class="loop">
+        <span class="node">Set intentions</span><span class="ar">→</span>
+        <span class="node">Test (×3)</span><span class="ar">→</span>
+        <span class="node hot">Change ONE thing</span><span class="ar">→</span>
+        <span class="node">Test again</span>
+      </div>
+      <p class="lead" style="text-align:center;margin-top:1.8rem;max-width:64ch">The single highest-value coaching moment is stopping the <b>rewrite reflex.</b> When a test disappoints, students want to rewrite the whole prompt. Redirect: <span class="em-serif">"What's the ONE thing that most needs to change?"</span></p>
+      <p class="lead muted" style="text-align:center;margin-top:.8rem">Controlled experimentation = real learning. Failure is just exercise.</p>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">06 · The loop</span></div>
+  </section>
+
+  <!-- 7 DAY 2 WORKFLOW (CENTERPIECE) -->
+  <section class="slide">
+    <div class="kicker" style="color:var(--amber)">Day 2 · workflow</div>
+    <h2>Build a domain agent in AI Studio <span class="muted serif" style="font-size:.55em">— the agent</span></h2>
+    <div class="slide-body">
+      <div class="flow" style="--accent:var(--amber)">
+        <div class="fstep" style="--accent:var(--amber)"><div class="num">1</div><div class="txt"><b>Open the playground</b><span><span class="chip">aistudio.google.com</span> → new Chat prompt. No API key needed.</span></div><div class="pill">18+ · no billing</div></div>
+        <div class="fstep" style="--accent:var(--amber)"><div class="num">2</div><div class="txt"><b>Pick the model: Flash</b><span>Fast, capable, generous free tier. Don't reach for Pro.</span></div><div class="pill">Right tool</div></div>
+        <div class="fstep" style="--accent:var(--amber)"><div class="num">3</div><div class="txt"><b>Write 5-part system instructions + paste knowledge doc</b><span>Identity · rules · domain knowledge · output format · context.</span></div><div class="pill">Controlled</div></div>
+        <div class="fstep" style="--accent:var(--amber)"><div class="num">4</div><div class="txt"><b>Turn ON Google Search grounding — leave the rest OFF</b><span>This is the toggle that makes it an agent. Least privilege: only what it needs.</span></div><div class="pill">The action</div></div>
+        <div class="fstep" style="--accent:var(--amber)"><div class="num">5</div><div class="txt"><b>Three tests + TWO change cycles</b><span>Happy path · fallback · trick/action. Confirm it actually searched (sources!).</span></div><div class="pill">Loop ×2</div></div>
+        <div class="fstep" style="--accent:var(--amber)"><div class="num">6</div><div class="txt"><b>Commit to <span class="chip">gemini-day2/</span></b><span>Knowledge doc · instructions + tool rationale · testing log.</span></div><div class="pill">GitHub</div></div>
+      </div>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">07 · Day 2 flow</span></div>
+  </section>
+
+  <!-- 8 THREE TESTS -->
+  <section class="slide">
+    <div class="kicker">How we validate — both days</div>
+    <h2>Three tests, every time</h2>
+    <div class="slide-body">
+      <div class="testrow">
+        <div class="testcard" style="--accent:var(--moss)"><div class="lbl">Test 1 · Happy / Known-good</div><div class="q">Something the knowledge clearly answers</div><div class="e">Correct answer, drawn from the document. Proves the bot reads its own material.</div></div>
+        <div class="testcard" style="--accent:var(--teal)"><div class="lbl">Test 2 · Fallback / Known-bad</div><div class="q">Something fully out of scope</div><div class="e">Clean refusal / honesty rule fires. <b>This is the one students set up too easy.</b> Make it genuinely uncovered.</div></div>
+        <div class="testcard" style="--accent:var(--amber)"><div class="lbl">Test 3 · Edge / Trick</div><div class="q">A boundary case — or needs live info</div><div class="e">Day 1: watch edge behavior. Day 2: it should <b>use the tool and show sources.</b></div></div>
+      </div>
+      <p class="lead muted" style="margin-top:1.5rem;text-align:center">A test suite where nothing fails taught the student nothing. <span class="em-serif">Engineer a failure.</span></p>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">08 · Validation</span></div>
+  </section>
+
+  <!-- 9 GOTCHAS -->
+  <section class="slide">
+    <div class="kicker" style="color:var(--rust)">What will bite you in the room</div>
+    <h2>Gotchas to pre-empt</h2>
+    <div class="slide-body">
+      <div class="gotchas">
+        <div class="gotcha"><div class="ic">⚠</div><div><b>College accounts don't have Gemini.</b><p>Every student needs a <b>personal</b> Google account. Say it on Day 1, slide 1. Sign out / back in with personal Gmail.</p></div></div>
+        <div class="gotcha"><div class="ic">🔞</div><div><b>Age gates differ: Gems 13+, AI Studio 18+.</b><p>Find out before Day 2 if anyone's under 18. Plan: they design the doc + instructions; pair with an 18+ classmate or watch the demo. Handle it discreetly.</p></div></div>
+        <div class="gotcha"><div class="ic">💳</div><div><b>"It's asking for a credit card / API key."</b><p>They wandered out of the playground. Redirect — Day 2 needs <b>no key and no billing.</b> If payment is requested, stop.</p></div></div>
+        <div class="gotcha"><div class="ic">🔍</div><div><b>"It answered, so it must have searched." — Often it didn't.</b><p>Grounded answers show <b>source links.</b> No links = the tool didn't fire. Confirm the toggle is on; verify by citations, not vibes.</p></div></div>
+        <div class="gotcha"><div class="ic">📄</div><div><b>The Gem "forgets" the end of a long file.</b><p>Free-tier context is ~50 pages. Not a bug. Coach focused, shorter knowledge files.</p></div></div>
+        <div class="gotcha"><div class="ic">🔒</div><div><b>Free-tier data may be human-reviewed.</b><p>Personal free accounts: inputs can train Google's products and be read by reviewers. <b>No private uploads.</b> Reinforce verbally.</p></div></div>
+      </div>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">09 · Gotchas</span></div>
+  </section>
+
+  <!-- 10 LEAST PRIVILEGE -->
+  <section class="slide">
+    <div class="kicker">The judgment that defines an agent</div>
+    <h2>More power, more responsibility</h2>
+    <div class="slide-body">
+      <div class="grid2">
+        <div class="card" style="border-color:rgba(232,161,58,.35)">
+          <h3><span class="dot d-amber"></span>Least privilege</h3>
+          <p style="font-size:1rem">Every tool you leave on is a tool the agent might use in a way you didn't expect. Turn on <b>only what it needs.</b> Today that's Search — and nothing else.</p>
+          <p style="margin-top:.8rem;font-size:1rem">Make students <b>write one sentence per tool</b> explaining on/off. The thinking is the artifact, even when the toggle is simple.</p>
+        </div>
+        <div class="card" style="border-color:rgba(63,182,168,.35)">
+          <h3><span class="dot d-teal"></span>Trust, but verify</h3>
+          <p style="font-size:1rem">An agent that searches the live web can be wrong, biased, or stale. The skill isn't "it found an answer" — it's <b>checking the sources</b> it returned.</p>
+          <p style="margin-top:.8rem;font-size:1rem">Closing question for the room: <span class="em-serif">"What's one risk of letting this thing search the open web on its own?"</span></p>
+        </div>
+      </div>
+      <p class="lead muted" style="text-align:center;margin-top:1.4rem">This is the same lesson as Console tool-permissions — it just transfers to a different switch.</p>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">10 · Tool judgment</span></div>
+  </section>
+
+  <!-- 11 GRADING -->
+  <section class="slide">
+    <div class="kicker">How it's assessed</div>
+    <h2>Complete / re-do · the four categories</h2>
+    <div class="slide-body">
+      <p class="lead">Reward <b>process, not a perfect bot.</b> First attempts sit in the Developing-to-Proficient band. The graded artifacts are the committed files.</p>
+      <div class="grid2" style="margin-top:.6rem">
+        <div class="card"><h3><span class="dot d-amber"></span>AI Partnership Quality</h3><p>Three questions + honesty rule (D1). Five-part instructions, real knowledge doc, Search enabled <i>with a reason</i> (D2).</p></div>
+        <div class="card"><h3><span class="dot d-teal"></span>Problem-Solving Process</h3><p>Three tests run; controlled one-change cycles documented — not full rewrites. (D2: at least two.)</p></div>
+        <div class="card"><h3><span class="dot d-moss"></span>Professional Communication</h3><p>Files organized under <span class="chip">gemini-dayN/</span>, clear commit message, tool-rationale note.</p></div>
+        <div class="card"><h3><span class="dot d-rust"></span>Critical Thinking &amp; Ethics</h3><p>Reflection shows edge-behavior noticed, sources checked, one real risk named.</p></div>
+      </div>
+      <p class="lead muted" style="margin-top:1.1rem">Read the reflections — that's where AI-partnership quality becomes <b>observable</b>: what did they ask their AI, and did they push back?</p>
+    </div>
+    <div class="foot"><span>The Gemini Path</span><span class="seg">11 · Grading</span></div>
+  </section>
+
+  <!-- 12 CLOSE -->
+  <section class="slide intro">
+    <div class="kicker">The throughline</div>
+    <h1 style="max-width:18ch">The judgment is yours,<br>not the platform's.</h1>
+    <p class="sub" style="max-width:54ch">Day 1 proved the loop transfers to a Gem. Day 2 proved the assistant-to-agent jump transfers to AI Studio. Which tools to grant, when to trust the output, how to test for intent — that's what students carry to <span class="serif">whatever tool comes next.</span></p>
+    <div style="margin-top:2rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <span class="tag t-teal">Gem ≈ Project</span>
+      <span class="tag t-amber">AI Studio ≈ Console</span>
+      <span class="tag t-moss">Same loop. Second ladder.</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="navhint">← / → or Space to navigate · F for fullscreen</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('dots');
+  let i = 0;
+  slides.forEach((_,idx)=>{const d=document.createElement('i');if(idx===0)d.className='on';dotsWrap.appendChild(d);});
+  const dots = Array.from(dotsWrap.children);
+  function go(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,idx)=>s.classList.toggle('active', idx===i));
+    dots.forEach((d,idx)=>d.classList.toggle('on', idx===i));
+  }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);}
+    else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key.toLowerCase()==='f'){
+      if(!document.fullscreenElement){document.documentElement.requestFullscreen();}
+      else{document.exitFullscreen();}
+    }
+  });
+  // click right half = next, left half = prev
+  document.getElementById('deck').addEventListener('click', e=>{
+    const x = e.clientX / window.innerWidth;
+    go(x > 0.5 ? i+1 : i-1);
+  });
+  // touch swipe
+  let tx=0;
+  document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)go(dx<0?i+1:i-1);},{passive:true});
+</script>
+</body>
+</html>
