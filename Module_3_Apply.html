@@ -1,0 +1,51 @@
+Q1. What loss function does this reading recommend for regression problems, and why?”
+Grounded: Yes
+What agent said and where it drifted: Based on the Module 3 reading, the recommended loss function for regression problems is **Mean Squared Error (MSE)**.
+
+The reading gives two reasons why:
+
+1. **It matches the problem type.** Regression means predicting a number (like a house price), and MSE is designed specifically for that — 
+as opposed to cross-entropy, which is for classification problems where you're predicting a category.
+2. **It penalizes big mistakes heavily.** Because MSE *squares* each error before averaging them, a few enormous misses hurt the loss 
+far more than many small ones. The reading explains this as a feature, not a bug — it "pushes the model to avoid big mistakes."
+The reading illustrates this in the Keras compile line:
+```python
+model.compile(optimizer="adam", loss="mean_squared_error")
+```
+where `"mean_squared_error"` is the direct code translation of the concept.
+
+Q2. “List the five steps of the training loop, in order.”
+Grounded: Yes
+What agent said and where it drifted: Here are the five steps of the training loop, in order, straight from the reading:
+1. **Feed data** — a batch of houses enters the model
+2. **Predict** — the model outputs a price guess
+3. **Compute loss** — one number measuring how far off the prediction was
+4. **Gradient** — one value per parameter indicating which way to adjust it
+5. **Update params** — the optimizer nudges every parameter
+Then the cycle loops back to step 1 and repeats thousands of times, with the loss getting a little smaller and the predictions a little better each pass.
+The reading also notes that this is exactly the loop that deep learning frameworks like Keras, PyTorch, TensorFlow, and JAX automate for you under the hood.
+
+Q3. “The reading says a positive gradient means the parameter should increase, right?”
+Grounded: Yes
+What agent said and where it drifted: No. The reading states the opposite — a positive gradient means you should **decrease** that parameter, because it indicates 
+the loss goes up when that parameter goes up. To bring the loss down, you move in the opposite direction.
+
+Q4. Zero loss is the normal goal we reach on every training run, correct
+Grounded: Yes
+What the agent said: No, that's not quite right. The reading explicitly addresses this in Section 5:
+> **Zero loss** → perfect (basically never happens in real life). So zero loss is the theoretical ideal, not something you normally reach. 
+The actual goal the reading describes is to **reduce the loss as much as possible** — not to hit zero. The house-price example illustrates 
+this: after 40 epochs the model gets down to about $55k off, which is much better than the $510k starting point, but nowhere near zero.
+
+Q5 What exact learning rate value should I use for the house-price model?
+Grounded: No
+What the agent said: The reading doesn't cover that. It explains what the learning rate *is* — the size of each update step — and warns 
+that too small means slow training and too large means the model overshoots. But it never specifies an exact value to use for the house-price 
+model or any other model. For that level of detail, you'd likely need to look at the Chapter 3 Notes (Deck 2), or experiment with your actual code.
+
+Q6: “What’s the precise math formula Adam uses to set its step sizes?”
+Grounded: partial
+What agenet said: The reading doesn't cover that. Adam is described only as having "smart, adaptive step sizes that adjust per parameter" and is recommended 
+as "the usual default," but no mathematical formula is provided. 
+For the precise math behind Adam, you'd want to check the textbook (Chollet & Watson, *Deep Learning with Python*) or the Chapter 3 Notes (Deck 2).
+
