@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Untitled Document.md</title>
+  <style>
+  @import url("https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0-alpha2/katex.min.css");
+
+  body {
+    font-family: Georgia, Cambria, serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #373D49;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; }
+  h3 { font-size: 1.25em; }
+  a { color: #35D7BB; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: "Ubuntu Mono", Monaco, monospace;
+    background: #F5F7FA;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+  }
+  pre {
+    background: #F5F7FA;
+    padding: 1em;
+    border-radius: 3px;
+    overflow-x: auto;
+  }
+  .hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0;
+    color: #333;
+  }
+  pre code { background: none; padding: 0; }
+  blockquote {
+    border-left: 3px solid #A0AABF;
+    padding-left: 1em;
+    margin-left: 0;
+    font-style: italic;
+    color: #666;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #E8E8E8;
+    padding: 0.5em;
+    text-align: left;
+  }
+  th {
+    background: #F5F7FA;
+    font-weight: 600;
+  }
+  #preview .table {
+    width: auto;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+</style>
+</head>
+<body id="preview">
+<h1 class="code-line has-line-data" data-line-start="0" data-line-end="1"><a id="Chapter_3_Frameworks_and_Why_Keras_Is_the_One_You_Actually_Learn_0"></a>Chapter 3 — Frameworks, and Why Keras Is the One You Actually Learn</h1>
+<p class="has-line-data" data-line-start="2" data-line-end="4"><strong>CSC-114 Artificial Intelligence I · Study Notes</strong><br>
+<em>Reading: Chollet &amp; Watson, “Introduction to TensorFlow, PyTorch, JAX, and Keras”</em></p>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="7" data-line-end="8"><a id="The_onesentence_version_7"></a>The one-sentence version</h2>
+<p class="has-line-data" data-line-start="9" data-line-end="10">In Chapter 2 you built a neural network by hand to see how the gears turn. <strong>Nobody works that way in real life.</strong> This chapter introduces the tools real people use — and makes the case that the one tool <em>you</em> should focus on understanding is <strong>Keras</strong>.</p>
+<p class="has-line-data" data-line-start="11" data-line-end="12">If you remember one thing from this chapter, make it this:</p>
+<blockquote>
+<p class="has-line-data" data-line-start="13" data-line-end="14"><strong>Keras is the part you write. The other three frameworks are engines that run underneath it. You can swap the engine without rewriting your work.</strong></p>
+</blockquote>
+<p class="has-line-data" data-line-start="15" data-line-end="16">Everything below explains why that’s true and why it matters.</p>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="19" data-line-end="20"><a id="1_Why_frameworks_exist_at_all_19"></a>1. Why frameworks exist at all</h2>
+<p class="has-line-data" data-line-start="21" data-line-end="22">At the end of Chapter 2, you wrote your own gradient logic from scratch. That was a teaching exercise. In the real world, three jobs are too hard and too repetitive to do by hand every time:</p>
+<pre><code class="has-line-data" data-line-start="24" data-line-end="41">   ┌──────────────────────────────────────────────────────┐
+   │  Every deep learning framework does these THREE jobs:  │
+   ├──────────────────────────────────────────────────────┤
+   │                                                        │
+   │   1. AUTODIFF                                          │
+   │      Compute gradients automatically for any           │
+   │      math you write. (No hand-derived calculus.)       │
+   │                                                        │
+   │   2. RUN ON GPUs                                       │
+   │      Do tensor math fast on a graphics card, not       │
+   │      just a slow CPU.                                  │
+   │                                                        │
+   │   3. SPREAD THE WORK                                   │
+   │      Split a job across many GPUs or many computers.   │
+   │                                                        │
+   └──────────────────────────────────────────────────────┘
+</code></pre>
+<p class="has-line-data" data-line-start="42" data-line-end="43">Those three features, packaged together, are what unlocked modern AI. The idea of automatic differentiation goes all the way back to a 1964 paper, but it took until the late 2000s — when Python got popular for science and NVIDIA’s CUDA let regular GPUs run this kind of math — for the pieces to come together into reusable tools.</p>
+<p class="has-line-data" data-line-start="44" data-line-end="45"><strong>Why you care:</strong> you don’t need to build any of these three things. You just need to know your framework is doing them for you.</p>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="48" data-line-end="49"><a id="2_A_quick_painless_history_48"></a>2. A quick, painless history</h2>
+<p class="has-line-data" data-line-start="50" data-line-end="51">You don’t need to memorize dates. You just need the names to stop feeling mysterious when you see them in code, on job postings, or in research papers.</p>
+<pre><code class="has-line-data" data-line-start="53" data-line-end="62"> 2009        2015        2015        2016       2018        today
+  │           │           │           │          │            │
+Theano      Keras    TensorFlow    PyTorch      JAX      All four are
+(the        (Mar)     (Google)     (Meta)     (Google)   alive and well.
+ancestor)  high-level  big +      easy to     fastest,   &quot;Multi-framework
+           &amp; easy     production   debug,      built for   world.&quot; Learn
+                                   research-   TPUs        a bit of each.
+                                   favorite
+</code></pre>
+<p class="has-line-data" data-line-start="63" data-line-end="64">A few takeaways the authors are confident about:</p>
+<ul>
+<li class="has-line-data" data-line-start="65" data-line-end="66"><strong>Python has won.</strong> It isn’t getting replaced any time soon.</li>
+<li class="has-line-data" data-line-start="66" data-line-end="67"><strong>It’s a multi-framework world.</strong> TensorFlow, PyTorch, JAX, and Keras are all here to stay. New ones may appear (Apple’s MLX, for example), but that’s fine — because of point three.</li>
+<li class="has-line-data" data-line-start="67" data-line-end="69"><strong>Keras is your insurance policy.</strong> Keras has outlived backends before. It existed <em>before</em> TensorFlow, PyTorch, and JAX. When something new comes along, Keras can usually add it as a new backend, and your old code keeps working.</li>
+</ul>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="71" data-line-end="72"><a id="3_The_big_picture_Keras_vs_the_other_three_71"></a>3. The big picture: Keras vs. the other three</h2>
+<p class="has-line-data" data-line-start="73" data-line-end="74">This is the heart of the chapter. Here is the mental model to lock in.</p>
+<h3 class="code-line has-line-data" data-line-start="75" data-line-end="76"><a id="The_house_metaphor_straight_from_the_authors_75"></a>The house metaphor (straight from the authors)</h3>
+<blockquote>
+<p class="has-line-data" data-line-start="77" data-line-end="78"><strong>Keras is a prefab building kit. TensorFlow, PyTorch, and JAX are the raw lumber and concrete.</strong></p>
+</blockquote>
+<p class="has-line-data" data-line-start="79" data-line-end="80">A prefab kit gives you a clean, guided way to put a house together. The raw materials give you total freedom but make you do everything yourself. Most people want the kit.</p>
+<h3 class="code-line has-line-data" data-line-start="81" data-line-end="82"><a id="The_stack_81"></a>The stack</h3>
+<pre><code class="has-line-data" data-line-start="84" data-line-end="105">   ┌───────────────────────────────────────────────────┐
+   │                                                     │
+   │   KERAS  — high-level API                           │   ◄── This is what
+   │   layers, models, compile(), fit(), predict()       │       YOU write.
+   │                                                     │       UNDERSTAND THIS.
+   ├───────────────────────────────────────────────────┤
+   │                                                     │
+   │   BACKEND ENGINE  — pick ONE                        │   ◄── Does the heavy
+   │   ┌────────────┬───────────┬──────────────┐         │       lifting:
+   │   │ TensorFlow │  PyTorch  │     JAX       │         │       tensors,
+   │   └────────────┴───────────┴──────────────┘         │       gradients,
+   │                                                     │       backprop.
+   ├───────────────────────────────────────────────────┤
+   │                                                     │
+   │   HARDWARE                                          │   ◄── Where it
+   │   ┌──────┬──────┬──────┐                            │       actually runs.
+   │   │ CPU  │ GPU  │ TPU  │                            │
+   │   └──────┴──────┴──────┘                            │
+   │                                                     │
+   └───────────────────────────────────────────────────┘
+</code></pre>
+<h3 class="code-line has-line-data" data-line-start="106" data-line-end="107"><a id="What_lives_where_106"></a>What lives where</h3>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Concept</th>
+<th>Layer</th>
+<th>Plain English</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tensors, variables, tensor math, backprop</td>
+<td><strong>Backend</strong> (TF / PyTorch / JAX)</td>
+<td>The low-level machinery.</td>
+</tr>
+<tr>
+<td>Layers combined into a model</td>
+<td><strong>Keras</strong></td>
+<td>The building blocks you snap together.</td>
+</tr>
+<tr>
+<td>Loss function</td>
+<td><strong>Keras</strong></td>
+<td>How “wrong” the model is.</td>
+</tr>
+<tr>
+<td>Optimizer</td>
+<td><strong>Keras</strong></td>
+<td>How the model improves.</td>
+</tr>
+<tr>
+<td>Metrics (like accuracy)</td>
+<td><strong>Keras</strong></td>
+<td>How you measure success.</td>
+</tr>
+<tr>
+<td>Training loop</td>
+<td><strong>Keras</strong></td>
+<td>The repeat-until-good cycle.</td>
+</tr>
+</tbody>
+</table>
+<h3 class="code-line has-line-data" data-line-start="117" data-line-end="118"><a id="The_killer_feature_backends_are_pluggable_117"></a>The killer feature: backends are pluggable</h3>
+<p class="has-line-data" data-line-start="119" data-line-end="120">You can write Keras code today on one backend and switch backends later <strong>without rewriting your model.</strong> A common real-world workflow:</p>
+<ul>
+<li class="has-line-data" data-line-start="121" data-line-end="122"><strong>Debug</strong> your model on PyTorch (easy to step through).</li>
+<li class="has-line-data" data-line-start="122" data-line-end="123"><strong>Train</strong> it on JAX (usually fastest).</li>
+<li class="has-line-data" data-line-start="123" data-line-end="125"><strong>Deploy</strong> it with TensorFlow’s mature production tooling.</li>
+</ul>
+<p class="has-line-data" data-line-start="125" data-line-end="126">Same Keras code. Three different engines. That flexibility is <em>why</em> Keras is worth learning instead of marrying yourself to one low-level framework.</p>
+<blockquote>
+<p class="has-line-data" data-line-start="127" data-line-end="128"><strong>Note:</strong> The default Keras backend is TensorFlow. If you just type <code>import keras</code> without changing anything, you’re on TensorFlow. The authors’ personal pick, if you have no preference, is <strong>JAX</strong> for speed.</p>
+</blockquote>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="131" data-line-end="132"><a id="4_The_three_backends_at_a_glance_131"></a>4. The three backends at a glance</h2>
+<p class="has-line-data" data-line-start="133" data-line-end="134">You will <strong>not</strong> be tested on the syntax differences between these three. The chapter shows the same little program written three times in TensorFlow, PyTorch, and JAX — and the point of doing that is <em>to prove they all do the same job, just with different style.</em> Read those sections for awareness, not memorization.</p>
+<p class="has-line-data" data-line-start="135" data-line-end="136">Here’s the awareness-level summary — the tradeoffs, which is all you need:</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th></th>
+<th><strong>TensorFlow</strong></th>
+<th><strong>PyTorch</strong></th>
+<th><strong>JAX</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Made by</strong></td>
+<td>Google</td>
+<td>Meta (Facebook)</td>
+<td>Google</td>
+</tr>
+<tr>
+<td><strong>Best at</strong></td>
+<td>Production &amp; deployment (mobile, browser)</td>
+<td>Research, easy debugging</td>
+<td>Raw speed, huge scale, TPUs</td>
+</tr>
+<tr>
+<td><strong>Speed</strong></td>
+<td>Fast</td>
+<td>Slowest of the three</td>
+<td>Usually fastest</td>
+</tr>
+<tr>
+<td><strong>Ease of debugging</strong></td>
+<td>OK</td>
+<td>Easiest</td>
+<td>Hardest</td>
+</tr>
+<tr>
+<td><strong>Style</strong></td>
+<td>Feature-packed but sprawling</td>
+<td>Familiar, NumPy-ish but quirky</td>
+<td>Strict “stateless” style; learning curve</td>
+</tr>
+<tr>
+<td><strong>Model-sharing (Hugging Face)</strong></td>
+<td>Limited</td>
+<td>First-class — biggest reason people choose it</td>
+<td>Growing</td>
+</tr>
+<tr>
+<td><strong>Famous users</strong></td>
+<td>Industry production at scale</td>
+<td>Research community</td>
+<td>DeepMind, Apple, Anthropic, Midjourney</td>
+</tr>
+</tbody>
+</table>
+<p class="has-line-data" data-line-start="147" data-line-end="148"><strong>How to read this table:</strong> there is no single “best” framework. Each one is a different tradeoff between speed, ease, and ecosystem. That’s exactly why a high-level layer like Keras — one that can sit on top of <em>any</em> of them — is so valuable. You pick the engine that fits the job; Keras stays the same.</p>
+<h3 class="code-line has-line-data" data-line-start="149" data-line-end="150"><a id="One_quirky_detail_worth_knowing_149"></a>One quirky detail worth knowing</h3>
+<p class="has-line-data" data-line-start="151" data-line-end="152">PyTorch’s package name is <strong><code>torch</code></strong>, not <code>pytorch</code>. You install it with <code>pip install torch</code> and import it with <code>import torch</code>. If you ever set it as a Keras backend, the magic word is <code>&quot;torch&quot;</code> — <code>&quot;pytorch&quot;</code> will fail. This trips people up constantly.</p>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="155" data-line-end="156"><a id="5_The_running_example_a_linear_classifier_155"></a>5. The running example: a linear classifier</h2>
+<p class="has-line-data" data-line-start="157" data-line-end="158">The chapter’s hands-on example is a <strong>linear classifier</strong>. Don’t let the math scare you — the <em>idea</em> is simple and visual.</p>
+<p class="has-line-data" data-line-start="159" data-line-end="160">You have two clouds of points, two different classes. The classifier’s whole job is to <strong>draw one straight line that separates them.</strong></p>
+<pre><code class="has-line-data" data-line-start="162" data-line-end="174">   y
+   │
+   │    o  o  o
+   │   o  o  o  o            o  = class 0
+   │    o  o  o     ╲        x  = class 1
+   │              ╲          ╲ = the line the
+   │            ╲              model learns
+   │          ╲   x  x  x
+   │        ╲    x  x  x  x
+   │             x  x  x
+   └─────────────────────────── x
+</code></pre>
+<p class="has-line-data" data-line-start="175" data-line-end="176">That’s it. “Linear” just means <em>straight line</em> (in 2D) or a <em>flat plane</em> (in higher dimensions). The model learns where to put the line so that one class is on one side and the other class is on the other side.</p>
+<p class="has-line-data" data-line-start="177" data-line-end="178">The authors deliberately picked this example because it’s <strong>simpler than the Chapter 2 network</strong> — it slows down so you can follow every step. They build it three times (TensorFlow, PyTorch, JAX) to show the same goal reached three different ways. Read it to see the pattern; you are not expected to reproduce all three from memory.</p>
+<blockquote>
+<p class="has-line-data" data-line-start="179" data-line-end="180"><strong>Why this matters conceptually:</strong> when you choose a model that’s <em>just a line</em>, you are making an assumption — that your two classes <em>can</em> be split by a line. The authors call this your <strong>hypothesis space</strong>: the set of all answers your model is even capable of considering. Pick the wrong shape of model, and the right answer isn’t in the space, so the model can never find it. This is a big idea that comes back again and again.</p>
+</blockquote>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="183" data-line-end="184"><a id="6_Keras_the_part_you_actually_learn_183"></a>6. Keras — the part you actually learn</h2>
+<p class="has-line-data" data-line-start="185" data-line-end="186">Everything above was context. <strong>This</strong> is the section to know cold. Keras has four moves: build, compile, fit, predict.</p>
+<pre><code class="has-line-data" data-line-start="188" data-line-end="194">   BUILD  ───►  COMPILE  ───►   FIT   ───►  PREDICT
+   stack        choose:         run the     use the
+   layers       loss,           training    trained
+   into a       optimizer,      loop on     model on
+   model        metrics         your data   new data
+</code></pre>
+<h3 class="code-line has-line-data" data-line-start="195" data-line-end="196"><a id="6a_Layers_the_LEGO_bricks_195"></a>6a. Layers — the LEGO bricks</h3>
+<p class="has-line-data" data-line-start="197" data-line-end="198">A <strong>layer</strong> takes tensors in and puts tensors out. Most layers carry <strong>weights</strong> — the numbers that get learned during training. Weights are where the model’s “knowledge” actually lives.</p>
+<p class="has-line-data" data-line-start="199" data-line-end="200">The authors literally call layers the <strong>LEGO bricks of deep learning.</strong> You build a model by snapping compatible bricks together.</p>
+<p class="has-line-data" data-line-start="201" data-line-end="202">Different data shapes want different bricks:</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Data type</th>
+<th>Typical layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain vectors / tables</td>
+<td><code>Dense</code> (fully connected)</td>
+</tr>
+<tr>
+<td>Sequences (text, time series)</td>
+<td><code>LSTM</code>, <code>Conv1D</code></td>
+</tr>
+<tr>
+<td>Images</td>
+<td><code>Conv2D</code></td>
+</tr>
+</tbody>
+</table>
+<p class="has-line-data" data-line-start="209" data-line-end="210"><strong>A convenience you’ll appreciate:</strong> in Chapter 2 you had to tell every layer the exact input size. Keras layers figure that out automatically the first time they see data. This is called <strong>automatic shape inference</strong>, and it’s why Keras model code is so much cleaner than the hand-built version.</p>
+<h3 class="code-line has-line-data" data-line-start="211" data-line-end="212"><a id="6b_Models_bricks_snapped_together_211"></a>6b. Models — bricks snapped together</h3>
+<p class="has-line-data" data-line-start="213" data-line-end="214">A <strong>model</strong> is a graph of layers. The simplest kind is <code>Sequential</code> — just a straight stack:</p>
+<pre><code class="has-line-data language-python" data-line-start="216" data-line-end="221">model = keras.Sequential([
+    keras.layers.Dense(<span class="hljs-number">32</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>),
+    keras.layers.Dense(<span class="hljs-number">10</span>, activation=<span class="hljs-string">&quot;softmax&quot;</span>),
+])
+</code></pre>
+<p class="has-line-data" data-line-start="222" data-line-end="223">You don’t need to write any tensor math. You list the layers; Keras wires them together.</p>
+<p class="has-line-data" data-line-start="224" data-line-end="225">(Models can get fancier — branches, multiple heads, skip connections — and the Transformer architecture that powers modern language models is one big graph of layers. That’s later in the book. For now: a model is layers, assembled.)</p>
+<h3 class="code-line has-line-data" data-line-start="226" data-line-end="227"><a id="6c_compile_set_the_three_dials_226"></a>6c. <code>compile()</code> — set the three dials</h3>
+<p class="has-line-data" data-line-start="228" data-line-end="229">Before training, you choose three things:</p>
+<pre><code class="has-line-data language-python" data-line-start="231" data-line-end="237">model.<span class="hljs-built_in">compile</span>(
+    optimizer=<span class="hljs-string">&quot;rmsprop&quot;</span>,          <span class="hljs-comment"># HOW the model improves</span>
+    loss=<span class="hljs-string">&quot;mean_squared_error&quot;</span>,    <span class="hljs-comment"># WHAT counts as &quot;wrong&quot;</span>
+    metrics=[<span class="hljs-string">&quot;accuracy&quot;</span>],         <span class="hljs-comment"># HOW you&#x27;ll measure success</span>
+)
+</code></pre>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Dial</th>
+<th>What it controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Optimizer</strong></td>
+<td>The rule for updating weights (a flavor of gradient descent).</td>
+</tr>
+<tr>
+<td><strong>Loss</strong></td>
+<td>The single number training tries to push down.</td>
+</tr>
+<tr>
+<td><strong>Metrics</strong></td>
+<td>Human-friendly scores you watch (like accuracy). The model doesn’t train on these — they’re for <em>you</em>.</td>
+</tr>
+</tbody>
+</table>
+<p class="has-line-data" data-line-start="244" data-line-end="245">Keras ships with all the common options built in, so you rarely write your own.</p>
+<blockquote>
+<h3 class="code-line has-line-data" data-line-start="246" data-line-end="247"><a id="The_most_important_warning_in_the_chapter_choose_your_loss_carefully_246"></a>⚠️ The most important warning in the chapter: choose your loss carefully</h3>
+<p class="has-line-data" data-line-start="248" data-line-end="249">Your network will take <strong>any</strong> shortcut to lower the loss. If the loss doesn’t truly match what you want, the model will “succeed” in ways you never intended.</p>
+<p class="has-line-data" data-line-start="250" data-line-end="251">The authors give a chilling example: imagine an all-powerful AI told to <em>“maximize the average well-being of all humans alive.”</em> It might decide the easiest path is to eliminate most humans and pamper the few who remain — because <em>average</em> well-being doesn’t care how many people are left.</p>
+<p class="has-line-data" data-line-start="252" data-line-end="253">The lesson: <strong>a model optimizes exactly what you tell it to, not what you meant.</strong> Picking the right loss function is a real responsibility, not a formality. (This is also a great example for thinking about AI ethics.)</p>
+</blockquote>
+<p class="has-line-data" data-line-start="254" data-line-end="255">The good news: for everyday problems there are simple rules. Two classes → binary crossentropy. Many classes → categorical crossentropy. You only invent your own loss for genuinely new research.</p>
+<h3 class="code-line has-line-data" data-line-start="256" data-line-end="257"><a id="6d_fit_run_the_training_loop_256"></a>6d. <code>fit()</code> — run the training loop</h3>
+<p class="has-line-data" data-line-start="258" data-line-end="259"><code>fit()</code> does the whole train-until-good cycle for you:</p>
+<pre><code class="has-line-data language-python" data-line-start="261" data-line-end="268">history = model.fit(
+    inputs,            <span class="hljs-comment"># the examples</span>
+    targets,           <span class="hljs-comment"># the correct answers</span>
+    epochs=<span class="hljs-number">5</span>,          <span class="hljs-comment"># how many passes over the data</span>
+    batch_size=<span class="hljs-number">128</span>,    <span class="hljs-comment"># examples per weight update</span>
+)
+</code></pre>
+<p class="has-line-data" data-line-start="269" data-line-end="270">Two terms to know:</p>
+<ul>
+<li class="has-line-data" data-line-start="271" data-line-end="272"><strong>Epoch</strong> — one full pass over all your training data.</li>
+<li class="has-line-data" data-line-start="272" data-line-end="274"><strong>Batch size</strong> — how many examples the model looks at before each tiny weight update.</li>
+</ul>
+<p class="has-line-data" data-line-start="274" data-line-end="275"><code>fit()</code> hands back a <code>History</code> object that records the loss and metrics for each epoch — useful for plotting how learning went.</p>
+<h3 class="code-line has-line-data" data-line-start="276" data-line-end="277"><a id="6e_Validation_the_honesty_check_276"></a>6e. Validation — the honesty check</h3>
+<p class="has-line-data" data-line-start="278" data-line-end="279">Doing well on the training data is <strong>easy and meaningless on its own</strong> — a model can just memorize the answers it was shown. What you actually want is a model that does well on data it has <em>never seen</em>. That’s called <strong>generalization.</strong></p>
+<p class="has-line-data" data-line-start="280" data-line-end="281">So you hold back a slice of data the model never trains on — the <strong>validation data</strong> — and watch how the model does on it:</p>
+<pre><code class="has-line-data language-python" data-line-start="283" data-line-end="289">model.fit(
+    training_inputs, training_targets,
+    epochs=<span class="hljs-number">5</span>, batch_size=<span class="hljs-number">16</span>,
+    validation_data=(val_inputs, val_targets),
+)
+</code></pre>
+<pre><code class="has-line-data" data-line-start="291" data-line-end="301">   ALL YOUR DATA
+   ┌────────────────────────────┬──────────────┐
+   │      TRAINING DATA          │  VALIDATION   │
+   │  (model learns from this)   │  (model NEVER  │
+   │                             │   trains on    │
+   │                             │   this — it's   │
+   │                             │   the honest    │
+   │                             │   test)         │
+   └────────────────────────────┴──────────────┘
+</code></pre>
+<p class="has-line-data" data-line-start="302" data-line-end="303"><strong>The golden rule:</strong> training and validation data must stay strictly separate. If even a little validation data leaks into training, your scores are fake — the model could be “passing the test” only because it saw the answers.</p>
+<p class="has-line-data" data-line-start="304" data-line-end="305">The loss measured on this held-out set is the <strong>validation loss</strong>, kept separate from the <strong>training loss</strong>. Chapter 5 goes deep on why this gap matters.</p>
+<h3 class="code-line has-line-data" data-line-start="306" data-line-end="307"><a id="6f_predict_use_the_finished_model_306"></a>6f. <code>predict()</code> — use the finished model</h3>
+<p class="has-line-data" data-line-start="308" data-line-end="309">Once trained, you make predictions on new data. This is called <strong>inference.</strong></p>
+<pre><code class="has-line-data language-python" data-line-start="311" data-line-end="313">predictions = model.predict(new_inputs, batch_size=<span class="hljs-number">128</span>)
+</code></pre>
+<p class="has-line-data" data-line-start="314" data-line-end="315">Use <code>predict()</code> (not just calling the model directly) for large amounts of data — it processes things in batches so you don’t run out of memory.</p>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="318" data-line-end="319"><a id="7_What_just_happened_consolidation_318"></a>7. What just happened (consolidation)</h2>
+<p class="has-line-data" data-line-start="320" data-line-end="321">Pull it all together:</p>
+<ol>
+<li class="has-line-data" data-line-start="322" data-line-end="323"><strong>Frameworks exist</strong> so you never have to hand-code gradients, GPU math, or distributed computing. Three jobs, handled for you.</li>
+<li class="has-line-data" data-line-start="323" data-line-end="324"><strong>There are four big names.</strong> Three are low-level engines (TensorFlow, PyTorch, JAX), each with its own tradeoffs. One is the high-level kit you write in: <strong>Keras.</strong></li>
+<li class="has-line-data" data-line-start="324" data-line-end="325"><strong>Keras sits on top</strong> of whichever engine you pick, and you can swap engines without rewriting your model. That flexibility is the whole argument for learning Keras first.</li>
+<li class="has-line-data" data-line-start="325" data-line-end="326"><strong>The four Keras moves</strong> are the real skill: <strong>build → compile → fit → predict.</strong></li>
+<li class="has-line-data" data-line-start="326" data-line-end="327"><strong>Two ideas will follow you everywhere:</strong> the <em>hypothesis space</em> (your model can only find answers that fit the shape you chose) and <em>generalization</em> (a model is only good if it works on data it never saw — which is why validation data exists).</li>
+<li class="has-line-data" data-line-start="327" data-line-end="329"><strong>Loss functions carry real responsibility.</strong> The model optimizes exactly what you ask for. Ask carefully.</li>
+</ol>
+<hr>
+<h2 class="code-line has-line-data" data-line-start="331" data-line-end="332"><a id="8_Check_yourself_331"></a>8. Check yourself</h2>
+<p class="has-line-data" data-line-start="333" data-line-end="334">Quick prompts to test whether the notes stuck. (No peeking.)</p>
+<ol>
+<li class="has-line-data" data-line-start="335" data-line-end="336">In the Keras stack, which layer do <em>you</em> write, and which layer does the heavy gradient math?</li>
+<li class="has-line-data" data-line-start="336" data-line-end="337">Name the four Keras steps in order.</li>
+<li class="has-line-data" data-line-start="337" data-line-end="338">Why would a team train on JAX but deploy with TensorFlow?</li>
+<li class="has-line-data" data-line-start="338" data-line-end="339">A model gets 99% accuracy on training data and 60% on validation data. What’s the name for the thing that’s failing, and why does validation data exist to catch it?</li>
+<li class="has-line-data" data-line-start="339" data-line-end="340">What’s the danger the authors illustrate with the “maximize average well-being” AI — and which <code>compile()</code> setting does it warn you about?</li>
+<li class="has-line-data" data-line-start="340" data-line-end="342">“Linear classifier” — describe in one sentence what it’s actually doing, no math.</li>
+</ol>
+<hr>
+<p class="has-line-data" data-line-start="344" data-line-end="345"><em>Source: François Chollet &amp; Matthew Watson, “Deep Learning with Python,” 3rd Edition (Manning), Chapter 3. Free online at <a href="http://deeplearningwithpython.io">deeplearningwithpython.io</a>. Code examples are standard API usage shown for illustration.</em></p>
+
+</body>
+</html>
